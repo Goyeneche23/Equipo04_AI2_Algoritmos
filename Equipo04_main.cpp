@@ -15,7 +15,7 @@ vector<vector<int>> leerMatriz(string nombreArchivo) {
     }
 
     int n;
-    archivo >> n; // número de colonias
+    archivo >> n; // num de colonias
 
     vector<vector<int>> matriz(n, vector<int>(n));
 
@@ -77,9 +77,9 @@ void primMST(vector<vector<int>> grafo) {
             }
         }
     }
-
+    
     // Mostrar resultado
-    cout << "\n---- [1] Forma óptima de cablear (MST - Algoritmo de Prim) ----\n";
+    cout << "\n---- [1] Forma opt de cablear (MST - Algoritmo de Prim) ----\n";
     int costoTotal = 0;
     for (int i = 1; i < n; i++) {
         cout << " (" << char('A' + padre[i]) << "," << char('A' + i)
@@ -87,6 +87,61 @@ void primMST(vector<vector<int>> grafo) {
         costoTotal += grafo[i][padre[i]];
     }
     cout << "Costo total: " << costoTotal << " km\n";
+}
+
+int mejorDistancia = INT_MAX;
+vector<int> mejorRuta;
+
+void tspBacktracking(vector<vector<int>> grafo, vector<bool> visitado,
+                     vector<int> ruta, int costoActual, int origen) {
+    int n = grafo.size();
+
+    // si ya visitamos todas las colonias
+    if (ruta.size() == n) {
+        // regresar al punto de inicio
+        costoActual += grafo[ruta.back()][origen];
+        if (costoActual < mejorDistancia) {
+            mejorDistancia = costoActual;
+            mejorRuta = ruta;
+        }
+        return;
+    }
+
+    // probar ir a cada colonia no visitada
+    for (int i = 0; i < n; i++) {
+        if (!visitado[i] && grafo[ruta.back()][i] > 0) {
+            visitado[i] = true;
+            ruta.push_back(i);
+
+            tspBacktracking(grafo, visitado, ruta,
+                            costoActual + grafo[ruta[ruta.size() - 2]][i], origen);
+
+            ruta.pop_back();
+            visitado[i] = false;
+        }
+    }
+}
+
+void resolverTSP(vector<vector<int>> grafo) {
+    int n = grafo.size();
+    vector<bool> visitado(n, false);
+    vector<int> ruta;
+
+    ruta.push_back(0); // comenzamos en A
+    visitado[0] = true;
+
+    mejorDistancia = INT_MAX;
+    mejorRuta.clear();
+
+    tspBacktracking(grafo, visitado, ruta, 0, 0);
+
+    cout << "\n---- [2] Ruta mas corta para visitar todas las colonias ----\n";
+    cout << "Ruta: ";
+    for (int i = 0; i < mejorRuta.size(); i++) {
+        cout << char('A' + mejorRuta[i]) << " -> ";
+    }
+    cout << "A\n";
+    cout << "Distancia total: " << mejorDistancia << " km\n";
 }
 
 
@@ -97,6 +152,7 @@ int main() {
 
     mostrarMatriz(grafo);
     primMST(grafo);
+    resolverTSP(grafo);
 
     return 0;
 }
