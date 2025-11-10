@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <limits>
+#include <queue>   // [P3] BFS Edmonds–Karp
 using namespace std;
 
 
@@ -137,11 +138,113 @@ void resolverTSP(vector<vector<int>> grafo) {
 
     cout << "\n---- [2] Ruta mas corta para visitar todas las colonias ----\n";
     cout << "Ruta: ";
-    for (int i = 0; i < mejorRuta.size(); i++) {
+    for (int i = 0; i < (int)mejorRuta.size(); i++) {
         cout << char('A' + mejorRuta[i]) << " -> ";
     }
     cout << "A\n";
     cout << "Distancia total: " << mejorDistancia << " km\n";
+}
+
+
+/* ============================================================
+   ===                 [PUNTO 3] Máximo Flujo               ===
+   ===   Sección añadida SIN modificar lo anterior          ===
+/* ============================================================ */
+
+vector<vector<int>> leerCapacidades(const string& nombreArchivo) {
+    ifstream in(nombreArchivo.c_str());
+    if (!in.is_open()) {
+        cout << "Error: No se pudo abrir el archivo de entrada." << endl;
+        exit(1);
+    }
+
+    int n;
+    if (!(in >> n) || n <= 1) {
+        cout << "Error: N invalido." << endl;
+        exit(1);
+    }
+
+    // consumir primera matriz (distancias)
+    int dummy;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (!(in >> dummy)) {
+                cout << "Error: matriz de distancias incompleta." << endl;
+                exit(1);
+            }
+        }
+    }
+
+    // leer segunda matriz (capacidades)
+    vector<vector<int>> cap(n, vector<int>(n, 0));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (!(in >> cap[i][j])) {
+                cout << "Error: matriz de capacidades incompleta." << endl;
+                exit(1);
+            }
+        }
+    }
+
+    return cap;
+}
+
+/* Edmonds–Karp: BFS sobre red residual.
+ */
+int maxFlowEdmondsKarp(vector<vector<int>> cap, int s, int t) {
+    int n = (int)cap.size();
+    int flujoMax = 0;
+
+    // BFS repetido hasta que no haya camino aumentante
+    while (true) {
+        vector<int> parent(n, -1);
+        parent[s] = s;
+        queue<int> q;
+        q.push(s);
+
+        while (!q.empty() && parent[t] == -1) {
+            int u = q.front(); q.pop();
+            for (int v = 0; v < n; ++v) {
+                if (parent[v] == -1 && cap[u][v] > 0) {
+                    parent[v] = u;
+                    q.push(v);
+                }
+            }
+        }
+
+        if (parent[t] == -1) break; // no hay más incrementos
+
+        // Encontrar cuello de botella
+        int incremento = numeric_limits<int>::max();
+        for (int v = t; v != s; v = parent[v]) {
+            int u = parent[v];
+            incremento = min(incremento, cap[u][v]);
+        }
+
+        // Actualizar residual
+        for (int v = t; v != s; v = parent[v]) {
+            int u = parent[v];
+            cap[u][v] -= incremento;
+            cap[v][u] += incremento;
+        }
+
+        flujoMax += incremento;
+    }
+
+    return flujoMax;
+}
+
+
+void resolverFlujoMaximo(const vector<vector<int>>& cap) {
+    int n = (int)cap.size();
+    int s = 0;        // A
+    int t = n - 1;    // última colonia
+    int valor = maxFlowEdmondsKarp(cap, s, t);
+
+    cout << "\n---- [3] Flujo maximo de informacion ----\n";
+    cout << "Origen:  " << char('A' + s) << "\n";
+    cout << "Destino: " << char('A' + t) << "\n";
+    cout << "Valor de flujo maximo: " << valor << "\n";
 }
 
 
@@ -153,6 +256,10 @@ int main() {
     mostrarMatriz(grafo);
     primMST(grafo);
     resolverTSP(grafo);
+
+    vector<vector<int>> capacidades = leerCapacidades(nombreArchivo);
+    resolverFlujoMaximo(capacidades);
+    /* --------------------------------------------------------------------- */
 
     return 0;
 }
