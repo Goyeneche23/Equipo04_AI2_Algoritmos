@@ -112,9 +112,10 @@ void tspBacktracking(vector<vector<int>> grafo, vector<bool> visitado,
     // probar ir a cada colonia no visitada
     for (int i = 0; i < n; i++) {
         if (!visitado[i] && grafo[ruta.back()][i] > 0) {
+            //si se encuentra un fin se marca como visitada
             visitado[i] = true;
             ruta.push_back(i);
-
+            // llamada recursiva
             tspBacktracking(grafo, visitado, ruta,
                             costoActual + grafo[ruta[ruta.size() - 2]][i], origen);
 
@@ -313,4 +314,3 @@ int main() {
     encontrarCentralMasCercana(centrales, nuevaCasa);
     return 0;
 }
-
