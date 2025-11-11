@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <limits>
+#include <cmath> 
 #include <queue>   // [P3] BFS Edmonds–Karp
 using namespace std;
 
@@ -248,6 +249,46 @@ void resolverFlujoMaximo(const vector<vector<int>>& cap) {
 }
 
 
+// Punto 4
+
+struct Punto {
+    double x;
+    double y;
+};
+
+// Devuelve el índice de la central más cercana a una nueva casa
+int encontrarCentralMasCercana(const vector<Punto>& centrales, const Punto& nuevaCasa) {
+    if (centrales.empty()) {
+        cout << "Error: no hay centrales registradas." << endl;
+        return -1;
+    }
+
+    int indiceMasCercano = 0;
+    double distanciaMin = numeric_limits<double>::max();
+
+    for (int i = 0; i < (int)centrales.size(); ++i) {
+        double dx = centrales[i].x - nuevaCasa.x;
+        double dy = centrales[i].y - nuevaCasa.y;
+        double distancia = sqrt(dx * dx + dy * dy); // fórmula euclidiana
+
+        if (distancia < distanciaMin) {
+            distanciaMin = distancia;
+            indiceMasCercano = i;
+        }
+    }
+
+    cout << "\n---- [4] Central más cercana ----\n";
+    cout << "Nueva casa en (" << nuevaCasa.x << ", " << nuevaCasa.y << ")\n";
+    cout << "Central más cercana: #" << indiceMasCercano + 1 
+         << " en (" << centrales[indiceMasCercano].x << ", " 
+         << centrales[indiceMasCercano].y << ")\n";
+    cout << "Distancia: " << distanciaMin << " unidades\n";
+
+    return indiceMasCercano;
+}
+
+
+
 int main() {
     string nombreArchivo = "..\\Equipo04_Entrada.txt";
 
@@ -261,5 +302,15 @@ int main() {
     resolverFlujoMaximo(capacidades);
     /* --------------------------------------------------------------------- */
 
+    vector<Punto> centrales = {
+        {2.0, 3.0},
+        {5.0, 7.0},
+        {9.0, 4.0}
+    };
+
+    Punto nuevaCasa = {4.0, 5.0};
+
+    encontrarCentralMasCercana(centrales, nuevaCasa);
     return 0;
 }
+
