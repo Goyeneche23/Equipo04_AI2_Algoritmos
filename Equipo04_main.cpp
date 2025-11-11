@@ -148,10 +148,7 @@ void resolverTSP(vector<vector<int>> grafo) {
 }
 
 
-/* ============================================================
-   ===                 [PUNTO 3] Máximo Flujo               ===
-   ===   Sección añadida SIN modificar lo anterior          ===
-/* ============================================================ */
+
 
 vector<vector<int>> leerCapacidades(const string& nombreArchivo) {
     ifstream in(nombreArchivo.c_str());
@@ -314,3 +311,4 @@ int main() {
     encontrarCentralMasCercana(centrales, nuevaCasa);
     return 0;
 }
+
